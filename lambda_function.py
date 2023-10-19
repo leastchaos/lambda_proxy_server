@@ -1,7 +1,7 @@
 # proxy server for lambda function
 import requests
 import pickle
-
+import base64
 
 def lambda_handler(event, context):
     if "method" not in event or "url" not in event:
@@ -28,11 +28,13 @@ def lambda_handler(event, context):
         )
 
         if response.status_code == 200:
-            response_data = pickle.dumps(response)
+            pickled_data = pickle.dumps(response)
+            base64_data = base64.b64encode(pickled_data).decode("utf-8")
             return {
                 "statusCode": 200,
-                "body": response_data,
+                "body": base64_data,
                 "headers": {"Content-Type": "application/octet-stream"},
+                "isBase64Encoded": True
             }
 
         return {"statusCode": response.status_code, "body": "Request failed"}
